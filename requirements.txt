@@ -3,4 +3,4 @@ python-dateutil==2.9.0.post0
 Jinja2==3.1.4
 resend==2.4.0
 requests==2.32.3
-zai
+zai-sdk
