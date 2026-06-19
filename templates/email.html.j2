@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI Daily {{ date_str }}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#1f2328;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f6f8;padding:24px 0;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);padding:28px 32px;color:#ffffff;">
+            <div style="font-size:13px;letter-spacing:2px;opacity:0.85;text-transform:uppercase;">AI Daily Digest</div>
+            <div style="font-size:26px;font-weight:700;margin-top:6px;">{{ date_str }}</div>
+            <div style="font-size:14px;margin-top:8px;opacity:0.9;">全球 AI 新闻聚合 · 共 {{ total }} 条</div>
+          </td>
+        </tr>
+
+        {% if summary_paragraphs %}
+        <!-- AI 摘要 -->
+        <tr>
+          <td style="padding:24px 32px 8px;">
+            <div style="font-size:12px;color:#7c3aed;letter-spacing:1px;text-transform:uppercase;font-weight:700;">
+              ✦ 今日热点 · AI 总结
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 32px 12px;">
+            <div style="background:linear-gradient(135deg,#faf5ff 0%,#eef2ff 100%);border-left:3px solid #7c3aed;border-radius:8px;padding:18px 20px;">
+              {% for p in summary_paragraphs %}
+              <div style="font-size:14.5px;line-height:1.85;color:#1f2328;{% if not loop.last %}margin-bottom:10px;{% endif %}">
+                {{ p }}
+              </div>
+              {% endfor %}
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+
+        {% if total == 0 %}
+        <tr>
+          <td style="padding:48px 32px;text-align:center;color:#6b7280;font-size:14px;">
+            今天没有抓到新的 AI 新闻 🤔<br>
+            <span style="font-size:12px;color:#9ca3af;">可能是 RSS 源延迟,明天再来看看吧。</span>
+          </td>
+        </tr>
+        {% else %}
+
+        {% for category, items in groups %}
+        <tr>
+          <td style="padding:20px 32px 8px;">
+            <div style="font-size:12px;color:#6b7280;letter-spacing:1px;text-transform:uppercase;font-weight:600;">
+              {{ category }} · {{ items|length }} 条
+            </div>
+          </td>
+        </tr>
+        {% for item in items %}
+        <tr>
+          <td style="padding:12px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-left:3px solid #e5e7eb;padding-left:14px;">
+              <tr>
+                <td>
+                  <a href="{{ item.link }}" style="color:#111827;text-decoration:none;font-size:16px;font-weight:600;line-height:1.4;display:block;">
+                    {{ item.title }}
+                  </a>
+                  {% if item.summary %}
+                  <div style="font-size:13px;color:#4b5563;line-height:1.6;margin-top:6px;">
+                    {{ item.summary }}
+                  </div>
+                  {% endif %}
+                  <div style="font-size:12px;color:#9ca3af;margin-top:8px;">
+                    {{ item.source }} · {{ item.published.strftime('%H:%M') }}
+                    &nbsp;·&nbsp;
+                    <a href="{{ item.link }}" style="color:#4f46e5;text-decoration:none;">阅读原文 →</a>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        {% endfor %}
+        <tr><td style="padding:8px 32px;"><div style="height:1px;background:#f3f4f6;"></div></td></tr>
+        {% endfor %}
+
+        {% endif %}
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 32px 28px;color:#9ca3af;font-size:12px;text-align:center;">
+            生成于 {{ generated_at }} · 由 GitHub Actions 自动推送<br>
+            <span style="opacity:0.7;">数据来自 TechCrunch / The Verge / OpenAI / DeepMind / NVIDIA / 36氪 / 雷锋网 / 钛媒体 等公开 RSS 源</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
