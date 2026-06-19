@@ -5,7 +5,7 @@ import logging
 import os
 from typing import Iterable
 
-from zhipuai import ZhipuAI
+from zai import ZhipuAiClient
 
 from .fetcher import NewsItem
 
@@ -50,7 +50,7 @@ def summarize(items: list[NewsItem], date_str: str) -> str | None:
         return None
 
     try:
-        client = ZhipuAI(api_key=api_key)
+        client = ZhipuAiClient(api_key=api_key)
         news_text = _format_items_for_prompt(items)
         user_msg = (
             f"以下是 {date_str} 全球 AI 行业的新闻列表 (共 {len(items)} 条),"
