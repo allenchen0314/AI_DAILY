@@ -1,11 +1,11 @@
 # Everyday AI News 📬
 
-每天北京时间 7 点自动抓取**前一天**的全球 AI 新闻 (国际 + 中文),用 Claude 生成中文热点总结后,通过邮件发送到你的收件箱。
+每天北京时间 7 点自动抓取**前一天**的全球 AI 新闻 (国际 + 中文),用智谱 AI 生成中文热点总结后,通过邮件发送到你的收件箱。
 
 ```
 RSS (TechCrunch / OpenAI / NVIDIA / 36氪 / 雷锋网 / 爱范儿 ...)
         ↓  feedparser 抓取 + 按昨天发布过滤 + AI 关键词过滤 + 去重
-        ↓  Claude Sonnet 生成中文热点总结 (可选)
+        ↓  智谱 AI (GLM-4-Flash) 生成中文热点总结 (可选)
         ↓  Jinja2 渲染响应式 HTML 模板 (顶部摘要卡 + 分类列表)
         ↓  Resend API 投递
         ↓
@@ -21,7 +21,7 @@ everyday_news/
 ├── src/
 │   ├── feeds.py        # RSS 源列表 (国际 6 + 厂商 6 + 中文 5)
 │   ├── fetcher.py      # 抓取 + 日期过滤 + AI 关键词过滤 + 去重
-│   ├── summarizer.py   # 调用 Claude Sonnet 生成中文热点总结
+│   ├── summarizer.py   # 调用智谱 AI 生成中文热点总结
 │   ├── renderer.py     # 调用 Jinja2 渲染
 │   ├── sender.py       # Resend 发送邮件
 │   └── main.py         # 主入口
@@ -61,18 +61,18 @@ pip install -r requirements.txt
 2. 进入 [API Keys](https://resend.com/api-keys),点击 **Create API Key**,复制 `re_xxx...`
 3. 想要更专业的发件域名,可以在 [Domains](https://resend.com/domains) 添加并配置 DNS;**不配置也能直接用** `onboarding@resend.dev` 测试
 
-### 3. (可选) 申请 Anthropic API Key
+### 3. (可选) 申请智谱 AI API Key
 
-用于让 Claude 生成中文热点总结,**不配置也能正常发邮件**,只是没有顶部摘要卡。
+用于生成中文热点总结,**不配置也能正常发邮件**,只是没有顶部摘要卡。
 
-1. 打开 https://console.anthropic.com/ 注册并充值
-2. 进入 **API Keys**,创建并复制 `sk-ant-xxx...`
+1. 打开 https://open.bigmodel.cn/ 注册并实名认证
+2. 进入 **API Keys** 创建并复制(格式类似 `xxxxxxxxxxxxxxxx.xxxxxxxxxxxxxx`)
 
 ### 4. 配置环境变量
 
 ```bash
 cp .env.example .env
-# 编辑 .env 填入 RESEND_API_KEY、(可选) ANTHROPIC_API_KEY
+# 编辑 .env 填入 RESEND_API_KEY、(可选) ZHIPU_API_KEY
 ```
 
 然后 export 一下:
@@ -90,7 +90,7 @@ python -m src.main --dry-run
 open output/preview.html        # 浏览器查看效果
 ```
 
-跳过 Claude 总结 (省 API 费用,快速调试抓取/模板):
+跳过智谱总结 (省 API 费用,快速调试抓取/模板):
 
 ```bash
 python -m src.main --dry-run --no-summary
@@ -128,7 +128,7 @@ gh repo create everyday-news --private --source=. --push
 | `RESEND_API_KEY`    | ✅ 必需  | 你的 Resend API key,例如 `re_AbCd1234...`              |
 | `MAIL_FROM`         | ✅ 必需  | `AI Daily <onboarding@resend.dev>` (或你验证过的域名)   |
 | `MAIL_TO`           | ✅ 必需  | `chenzhipengsr43@gmail.com`                             |
-| `ANTHROPIC_API_KEY` | 可选     | `sk-ant-xxx...` — 不配置则邮件不带 AI 摘要,正文照常发 |
+| `ZHIPU_API_KEY`     | 可选     | 智谱 AI key — 不配置则邮件不带 AI 摘要,正文照常发       |
 
 ### 3. 手动触发一次验证
 
@@ -153,9 +153,9 @@ GitHub Actions 整点排队严重,可能延迟 5-30 分钟。`:07` 错峰能更�
 编辑 `src/feeds.py` 的 `FEEDS` 列表,追加 `(显示名, RSS URL, 分类, 是否启用 AI 过滤)`。分类目前有 `国际` / `厂商` / `中文`,新分类会自动作为邮件中的一个分组。
 
 **Q: 想换总结模型?**
-环境变量 `CLAUDE_MODEL` 可以指定具体模型 ID,默认 `claude-sonnet-4-20250514`。摘要 prompt 在 `src/summarizer.py` 的 `SYSTEM_PROMPT`,可以按口味改字数/语气/格式。
+环境变量 `ZHIPU_MODEL` 可以指定具体模型 ID,默认 `glm-4-flash`(高性价比)。可选 `glm-4-plus`(更强推理)、`glm-4-air`(轻量)等。摘要 prompt 在 `src/summarizer.py` 的 `SYSTEM_PROMPT`,可以按口味改字数/语气/格式。
 
-**Q: 不想用 Claude,想换 OpenAI / 国产模型?**
+**Q: 不想用智谱,想换 Claude / OpenAI / 其他模型?**
 改 `src/summarizer.py` 的 `summarize()` 实现即可,主流程只要求它返回 `str | None`。返回 `None` 时模板会自动隐藏摘要区块。
 
 **Q: 昨天没有新闻怎么办?**
@@ -167,5 +167,3 @@ GitHub Actions 整点排队严重,可能延迟 5-30 分钟。`:07` 错峰能更�
 ## License
 
 MIT
-# AI_DAILY
-# AI_DAILY

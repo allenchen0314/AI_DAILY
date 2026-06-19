@@ -1,17 +1,17 @@
-"""使用 Claude 生成中文每日 AI 热点总结"""
+"""使用智谱 AI 生成中文每日 AI 热点总结"""
 from __future__ import annotations
 
 import logging
 import os
 from typing import Iterable
 
-from anthropic import Anthropic
+from zai import ZhipuAiClient
 
 from .fetcher import NewsItem
 
 logger = logging.getLogger(__name__)
 
-MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-20250514")
+MODEL = os.environ.get("ZHIPU_MODEL", "glm-4-flash")
 
 SYSTEM_PROMPT = """你是一名资深 AI 行业编辑,任务是把今天全球 AI 新闻整理成一段精炼的中文热点摘要。
 
@@ -37,12 +37,12 @@ def summarize(items: list[NewsItem], date_str: str) -> str | None:
     """
     生成中文每日总结。失败时返回 None,调用方应优雅降级 (邮件不带总结部分)。
 
-    需要环境变量: ANTHROPIC_API_KEY
-    可选环境变量: CLAUDE_MODEL (默认 claude-sonnet-4-20250514)
+    需要环境变量: ZHIPU_API_KEY
+    可选环境变量: ZHIPU_MODEL (默认 glm-4-flash)
     """
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("ZHIPU_API_KEY")
     if not api_key:
-        logger.warning("未设置 ANTHROPIC_API_KEY,跳过 AI 总结")
+        logger.warning("未设置 ZHIPU_API_KEY,跳过 AI 总结")
         return None
 
     if not items:
@@ -50,33 +50,32 @@ def summarize(items: list[NewsItem], date_str: str) -> str | None:
         return None
 
     try:
-        client = Anthropic(api_key=api_key)
+        client = ZhipuAiClient(api_key=api_key)
         news_text = _format_items_for_prompt(items)
         user_msg = (
             f"以下是 {date_str} 全球 AI 行业的新闻列表 (共 {len(items)} 条),"
             f"请按要求输出中文热点摘要:\n\n{news_text}"
         )
 
-        logger.info("调用 Claude (%s) 生成中文总结,新闻 %d 条", MODEL, len(items))
-        resp = client.messages.create(
+        logger.info("调用智谱 AI (%s) 生成中文总结,新闻 %d 条", MODEL, len(items))
+        resp = client.chat.completions.create(
             model=MODEL,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_msg},
+            ],
             max_tokens=1024,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_msg}],
+            temperature=0.7,
         )
 
-        text_parts = []
-        for block in resp.content:
-            if getattr(block, "type", None) == "text":
-                text_parts.append(block.text)
-        summary = "".join(text_parts).strip()
+        summary = resp.choices[0].message.content.strip() if resp.choices else ""
         if not summary:
-            logger.warning("Claude 返回空内容")
+            logger.warning("智谱 AI 返回空内容")
             return None
 
         logger.info("总结生成成功,长度 %d 字", len(summary))
         return summary
 
     except Exception as e:
-        logger.exception("Claude 总结失败,将不带总结发送邮件: %s", e)
+        logger.exception("智谱 AI 总结失败,将不带总结发送邮件: %s", e)
         return None
