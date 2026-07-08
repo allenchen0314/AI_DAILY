@@ -23,10 +23,13 @@ def send_email(subject: str, html: str) -> str:
         raise RuntimeError("环境变量 RESEND_API_KEY 未设置")
 
     mail_from = os.environ.get("MAIL_FROM", "AI Daily <onboarding@resend.dev>")
-    mail_to_raw = os.environ.get("MAIL_TO", "chenzhipengsr43@gmail.com")
+    mail_to_raw = os.environ.get("MAIL_TO")
+    if not mail_to_raw:
+        raise RuntimeError("环境变量 MAIL_TO 未设置")
+
     to_list = [s.strip() for s in mail_to_raw.split(",") if s.strip()]
     if not to_list:
-        raise RuntimeError("环境变量 MAIL_TO 未设置或为空")
+        raise RuntimeError("环境变量 MAIL_TO 为空或格式不正确")
 
     resend.api_key = api_key
     params: resend.Emails.SendParams = {

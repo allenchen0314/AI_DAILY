@@ -9,7 +9,7 @@ RSS (TechCrunch / OpenAI / NVIDIA / 36氪 / 雷锋网 / 爱范儿 ...)
         ↓  Jinja2 渲染响应式 HTML 模板 (顶部摘要卡 + 分类列表)
         ↓  Resend API 投递
         ↓
-    📧 chenzhipengsr43@gmail.com
+    📧 你的邮箱 (可配置多个收件人)
         ↑
 GitHub Actions cron (UTC 23:07 = 北京次日 07:07)
 ```
@@ -127,7 +127,7 @@ gh repo create everyday-news --private --source=. --push
 | ------------------- | -------- | ------------------------------------------------------- |
 | `RESEND_API_KEY`    | ✅ 必需  | 你的 Resend API key,例如 `re_AbCd1234...`              |
 | `MAIL_FROM`         | ✅ 必需  | `AI Daily <onboarding@resend.dev>` (或你验证过的域名)   |
-| `MAIL_TO`           | ✅ 必需  | `chenzhipengsr43@gmail.com`                             |
+| `MAIL_TO`           | ✅ 必需  | 收件人邮箱，多个用逗号分隔，如 `user1@example.com,user2@example.com` |
 | `ZHIPU_API_KEY`     | 可选     | 智谱 AI key — 不配置则邮件不带 AI 摘要,正文照常发       |
 
 ### 3. 手动触发一次验证
